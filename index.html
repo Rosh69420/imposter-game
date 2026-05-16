@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Imposter Word Game</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #111827, #1f2937, #312e81);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 500px;
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 30px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      font-size: 2.2rem;
+    }
+
+    p {
+      color: #d1d5db;
+      margin-bottom: 20px;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      font-size: 1rem;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      background: #6366f1;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.2s;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background: #4f46e5;
+      transform: scale(1.02);
+    }
+
+    .card {
+      margin-top: 20px;
+      padding: 30px;
+      border-radius: 15px;
+      background: rgba(255,255,255,0.08);
+      min-height: 180px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .role {
+      font-size: 1.4rem;
+      margin-bottom: 15px;
+      color: #a5b4fc;
+    }
+
+    .word {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #fff;
+      text-transform: uppercase;
+    }
+
+    .small {
+      margin-top: 10px;
+      font-size: 0.9rem;
+      color: #cbd5e1;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .playerCount {
+      font-size: 1.1rem;
+      margin-top: 10px;
+      color: #cbd5e1;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>🎭 Imposter Word Game</h1>
+    <p>One player is the imposter and receives only a hint. Everyone else gets the real word.</p>
+
+    <div id="setupScreen">
+      <input type="number" id="players" placeholder="Number of Players" min="3" max="20" />
+      <div style="text-align:left;margin-bottom:15px;">
+        <div style="margin-bottom:10px;font-weight:bold;">Select Categories</div>
+
+        <label><input type="checkbox" class="categoryCheck" value="Animals" checked> Animals</label><br>
+        <label><input type="checkbox" class="categoryCheck" value="Brands" checked> Brands</label><br>
+        <label><input type="checkbox" class="categoryCheck" value="Anime" checked> Anime</label><br>
+        <label><input type="checkbox" class="categoryCheck" value="Objects" checked> Objects</label><br>
+        <label><input type="checkbox" class="categoryCheck" value="Games" checked> Games</label><br>
+        <label><input type="checkbox" class="categoryCheck" value="Sports" checked> Sports</label>
+      </div>
+
+      <button onclick="startGame()">Start Game</button>
+    </div>
+
+    <div id="gameScreen" class="hidden">
+      <div class="playerCount" id="playerText"></div>
+
+      <div class="card">
+        <div class="role" id="roleText">Pass the device</div>
+        <div class="word" id="wordText">Tap Reveal</div>
+        <div class="small" id="smallText"></div>
+      </div>
+
+      <button id="revealBtn" onclick="revealRole()">Reveal</button>
+      <button id="nextBtn" class="hidden" onclick="nextPlayer()">Next Player</button>
+    </div>
+  </div>
+
+  <script>
+    const categories = {
+      Animals: [
+        { word: "Tiger", hint: "Stripes" },
+        { word: "Lion", hint: "Leader" },
+        { word: "Elephant", hint: "Trunk" },
+        { word: "Penguin", hint: "Ice" },
+        { word: "Shark", hint: "Ocean predator" },
+        { word: "Dolphin", hint: "Smart sea animal" },
+        { word: "Panda", hint: "Bamboo" },
+        { word: "Wolf", hint: "Pack" },
+        { word: "Fox", hint: "Clever" },
+        { word: "Giraffe", hint: "Neck" },
+        { word: "Zebra", hint: "Piano" },
+        { word: "Bear", hint: "Winter Vacation" },
+        { word: "Eagle", hint: "Sharp vision" },
+        { word: "Snake", hint: "Cannot walk" },
+        { word: "Kangaroo", hint: "Pocket" },
+        { word: "Rabbit", hint: "Carrot" },
+        { word: "Monkey", hint: "Tree" },
+        { word: "Crocodile", hint: "Swamp" },
+        { word: "Horse", hint: "Ride" },
+        { word: "Owl", hint: "Big Eyes" },
+        { word: "Leopard", hint: "Spots" },
+        { word: "Falcon", hint: "Fast bird" },
+        { word: "Hippo", hint: "River giant" },
+        { word: "Rhino", hint: "Horn" },
+        { word: "Peacock", hint: "Colorful feathers" },
+        { word: "Koala", hint: "Hang" },
+        { word: "Camel", hint: "Ship" },
+        { word: "Octopus", hint: "Eight" },
+        { word: "Parrot", hint: "Pirates" },
+        { word: "Swan", hint: "Two to Heart" },
+        { word: "Bee", hint: "Queen" },
+        { word: "Ant", hint: "Sweet" },
+        { word: "Deer", hint: "Antlers" },
+        { word: "Goat", hint: "Horinzontal" },
+        { word: "Chicken", hint: "Breast" },
+        { word: "Duck", hint: "Ponds" },
+        { word: "Whale", hint: "Large" },
+        { word: "Bat", hint: "Echo" },
+        { word: "Frog", hint: "Jumps" },
+        { word: "Turtle", hint: "Shell" },
+        { word: "Llama", hint: "Spit" },
+        { word: "Otter", hint: "River animal" },
+        { word: "Raccoon", hint: "Masked face" },
+        { word: "Moose", hint: "Huge antlers" },
+        { word: "Jaguar", hint: "Vehicle" },
+        { word: "Chimpanzee", hint: "Primate" },
+        { word: "Hawk", hint: "Eye" },
+        { word: "Pigeon", hint: "Mail" },
+        { word: "Flamingo", hint: "Pink" },
+        { word: "Cheetah", hint: "Tear" },
+        { word: "Gorilla", hint: "Chest" },
+        { word: "Sloth", hint: "Slow" },
+        { word: "Walrus", hint: "Moustache" },
+        { word: "Seal", hint: "Clap" },
+        { word: "Starfish", hint: "Shallow Sea" },
+        { word: "Jellyfish", hint: "Transparent" },
+        { word: "Crab", hint: "Side" },
+        { word: "Lobster", hint: "Red" },
+        { word: "Penguin", hint: "Tuxedo" },
+        { word: "Ostrich", hint: "Big" },
+        { word: "Vulture", hint: "Carcass" },
+        { word: "Crow", hint: "Murder" },
+        { word: "Woodpecker", hint: "Drill" },
+        { word: "Hummingbird", hint: "Small" },
+        { word: "Pelican", hint: "Long" },
+        { word: "Donkey", hint: "Hardwork" },
+        { word: "Sheep", hint: "Ram" },
+        { word: "Pig", hint: "Mud" },
+        { word: "Cow", hint: "Dairy" },
+        { word: "Yak", hint: "Mountain" },
+        { word: "Panther", hint: "Black" },
+        { word: "Hyena", hint: "Laugh" },
+        { word: "Jackal", hint: "Howl" },
+        { word: "Porcupine", hint: "Spike" },
+        { word: "Armadillo", hint: "Roll" },
+        { word: "Squirrel", hint: "Nuts" },
+      ],
+
+      Brands: [
+        { word: "Nike", hint: "Just Do It" },
+        { word: "Adidas", hint: "Three stripes" },
+        { word: "Apple", hint: "iPhone" },
+        { word: "Samsung", hint: "Galaxy" },
+        { word: "Google", hint: "Search" },
+        { word: "Microsoft", hint: "Windows" },
+        { word: "Sony", hint: "PlayStation" },
+        { word: "Tesla", hint: "Electric cars" },
+        { word: "BMW", hint: "Luxury car" },
+        { word: "Ferrari", hint: "Red sports car" },
+        { word: "Puma", hint: "Sportswear" },
+        { word: "Gucci", hint: "Luxury fashion" },
+        { word: "Rolex", hint: "Expensive watch" },
+        { word: "Amazon", hint: "Online shopping" },
+        { word: "Netflix", hint: "Streaming" },
+        { word: "YouTube", hint: "Videos" },
+        { word: "Discord", hint: "Gaming chat" },
+        { word: "Spotify", hint: "Music streaming" },
+        { word: "Intel", hint: "Processor" },
+        { word: "AMD", hint: "Ryzen" },
+        { word: "McDonalds", hint: "Burgers" },
+        { word: "KFC", hint: "Fried chicken" },
+        { word: "Burger King", hint: "Whopper" },
+        { word: "Coca Cola", hint: "Soft drink" },
+        { word: "Pepsi", hint: "Blue logo" },
+        { word: "Starbucks", hint: "Coffee" },
+        { word: "Lenovo", hint: "Laptop brand" },
+        { word: "HP", hint: "Printers" },
+        { word: "Dell", hint: "Computers" },
+        { word: "Asus", hint: "ROG" },
+        { word: "Acer", hint: "Budget laptops" },
+        { word: "Nvidia", hint: "Graphics cards" },
+        { word: "Guinness", hint: "World records" },
+        { word: "TikTok", hint: "Short videos" },
+        { word: "Instagram", hint: "Reels" },
+        { word: "Facebook", hint: "Social media" },
+        { word: "WhatsApp", hint: "Messaging" },
+        { word: "Toyota", hint: "Japanese cars" },
+        { word: "Honda", hint: "Motorcycles" },
+        { word: "Lamborghini", hint: "Supercar" },
+        { word: "Bugatti", hint: "Hypercar" },
+        { word: "Prada", hint: "Luxury fashion" },
+        { word: "Zara", hint: "Clothing store" },
+        { word: "H&M", hint: "Fashion retail" },
+        { word: "Alienware", hint: "Gaming PC" },
+        { word: "Red Bull", hint: "Energy drink" },
+        { word: "Monster", hint: "Green energy drink" },
+        { word: "Canon", hint: "Photography" },
+        { word: "Nintendo", hint: "Mario" }
+      ],
+
+      Anime: [
+        { word: "Naruto", hint: "Ninja" },
+        { word: "One Piece", hint: "Pirates" },
+        { word: "Bleach", hint: "Soul reaper" },
+        { word: "Dragon Ball", hint: "Saiyan" },
+        { word: "Attack on Titan", hint: "Giants" },
+        { word: "Death Note", hint: "Notebook" },
+        { word: "Demon Slayer", hint: "Breathing styles" },
+        { word: "Jujutsu Kaisen", hint: "Curses" },
+        { word: "Tokyo Ghoul", hint: "Masks" },
+        { word: "Chainsaw Man", hint: "Devils" },
+        { word: "Spy x Family", hint: "Fake family" },
+        { word: "Haikyuu", hint: "Volleyball" },
+        { word: "Blue Lock", hint: "Soccer anime" },
+        { word: "Hunter x Hunter", hint: "Nen" },
+        { word: "Pokemon", hint: "Catch them" },
+        { word: "Sailor Moon", hint: "Magical girl" },
+        { word: "Black Clover", hint: "Magic knights" },
+        { word: "Fullmetal Alchemist", hint: "Alchemy" },
+        { word: "Code Geass", hint: "Chess mind" },
+        { word: "JoJo", hint: "Stands" }
+      ],
+
+      Objects: [
+        { word: "Laptop", hint: "Keyboard" },
+        { word: "Phone", hint: "Calls" },
+        { word: "Camera", hint: "Photos" },
+        { word: "Chair", hint: "Sit" },
+        { word: "Table", hint: "Furniture" },
+        { word: "Television", hint: "Screen" },
+        { word: "Headphones", hint: "Music" },
+        { word: "Keyboard", hint: "Typing" },
+        { word: "Mouse", hint: "Cursor" },
+        { word: "Bottle", hint: "Drink" },
+        { word: "Fan", hint: "Cooling" },
+        { word: "Clock", hint: "Time" },
+        { word: "Mirror", hint: "Reflection" },
+        { word: "Pillow", hint: "Sleep" },
+        { word: "Backpack", hint: "School" },
+        { word: "Microwave", hint: "Heating" },
+        { word: "Refrigerator", hint: "Cold" },
+        { word: "Printer", hint: "Paper" },
+        { word: "Drone", hint: "Flying gadget" },
+        { word: "Speaker", hint: "Sound" },
+        { word: "Umbrella", hint: "Rain" },
+        { word: "Flashlight", hint: "Darkness" },
+        { word: "Scissors", hint: "Cutting" },
+        { word: "Toothbrush", hint: "Teeth" },
+        { word: "Helmet", hint: "Protection" },
+        { word: "Wallet", hint: "Money" },
+        { word: "Watch", hint: "Wrist" },
+        { word: "Remote", hint: "TV control" },
+        { word: "Calculator", hint: "Math" },
+        { word: "Suitcase", hint: "Travel" },
+        { word: "Candle", hint: "Wax" },
+        { word: "Spoon", hint: "Eating" },
+        { word: "Fork", hint: "Dining" },
+        { word: "Knife", hint: "Sharp" },
+        { word: "Basket", hint: "Carry items" },
+        { word: "Compass", hint: "Directions" },
+        { word: "Binoculars", hint: "Far vision" },
+        { word: "Tent", hint: "Camping" },
+        { word: "Router", hint: "Internet" },
+        { word: "Projector", hint: "Presentation" },
+        { word: "Stapler", hint: "Paper binding" },
+        { word: "Notebook", hint: "Writing" },
+        { word: "Paintbrush", hint: "Art" },
+        { word: "Ruler", hint: "Measurement" },
+        { word: "Lantern", hint: "Light source" },
+        { word: "Glasses", hint: "Vision" },
+        { word: "Trophy", hint: "Winning" },
+        { word: "Hammer", hint: "Tool" },
+        { word: "Vacuum", hint: "Cleaning" },
+        { word: "Desk", hint: "Wood" },
+        { word: "Bed", hint: "Mattress" },
+        { word: "Sofa", hint: "Cushion" },
+        { word: "Stool", hint: "Legs" },
+        { word: "Cabinet", hint: "Drawers" },
+        { word: "Bookshelf", hint: "Spine" },
+        { word: "Lamp", hint: "Bulb" },
+        { word: "Curtain", hint: "Fabric" },
+        { word: "Carpet", hint: "Fiber" },
+        { word: "Rug", hint: "Woven" },
+        { word: "Blanket", hint: "Warm" },
+        { word: "Towel", hint: "Cotton" },
+        { word: "Soap", hint: "Lather" },
+        { word: "Shampoo", hint: "Bottle" },
+        { word: "Comb", hint: "Teeth" },
+        { word: "Hairdryer", hint: "Noise" },
+        { word: "Razor", hint: "Blade" },
+        { word: "Nail Cutter", hint: "Clip" },
+        { word: "Mop", hint: "Squeeze" },
+        { word: "Broom", hint: "Sweep" },
+        { word: "Dustpan", hint: "Dust" },
+        { word: "Bucket", hint: "Plastic" },
+        { word: "Iron", hint: "Steam" },
+        { word: "Washing Machine", hint: "Spin" },
+        { word: "Dishwasher", hint: "Rinse" },
+        { word: "Oven", hint: "Bake" },
+        { word: "Toaster", hint: "Brown" },
+        { word: "Blender", hint: "Whirl" },
+        { word: "Juicer", hint: "Squeeze" },
+        { word: "Coffee Maker", hint: "Brew" },
+        { word: "Kettle", hint: "Boil" },
+        { word: "Cooker", hint: "Heat" },
+        { word: "Pan", hint: "Fry" },
+        { word: "Pot", hint: "Stew" },
+        { word: "Plate", hint: "Ceramic" },
+        { word: "Bowl", hint: "Round" },
+        { word: "Cup", hint: "Handle" },
+        { word: "Mug", hint: "Clay" },
+        { word: "Glass", hint: "Clear" },
+        { word: "Straw", hint: "Suck" },
+        { word: "Napkin", hint: "Fold" },
+        { word: "Tablecloth", hint: "Linen" },
+        { word: "Apron", hint: "Tie" },
+        { word: "Oven Mitt", hint: "Heat" },
+        { word: "Grater", hint: "Shred" },
+        { word: "Peeler", hint: "Strip" },
+        { word: "Can Opener", hint: "Metal" },
+        { word: "Corkscrew", hint: "Wine" },
+        { word: "Whisk", hint: "Wire" },
+        { word: "Rolling Pin", hint: "Dough" },
+        { word: "Measuring Cup", hint: "Pour" },
+        { word: "Weighing Scale", hint: "Pound" },
+        { word: "Thermometer", hint: "Mercury" },
+        { word: "Hanger", hint: "Hook" },
+        { word: "Drawer", hint: "Slide" },
+        { word: "Shelf", hint: "Bracket" },
+        { word: "Alarm Clock", hint: "Ring" },
+        { word: "Calendar", hint: "Month" },
+        { word: "Diary", hint: "Pages" },
+        { word: "Pen", hint: "Ink" },
+        { word: "Pencil", hint: "Lead" },
+        { word: "Eraser", hint: "Rub" },
+        { word: "Sharpener", hint: "Shave" },
+        { word: "Marker", hint: "Permanent" },
+        { word: "Highlighter", hint: "Neon" },
+        { word: "Glue Stick", hint: "Adhesive" },
+        { word: "Tape", hint: "Sticky" },
+        { word: "Paper Clip", hint: "Wire" },
+        { word: "Pin", hint: "Sharp" },
+        { word: "Thread", hint: "Sew" },
+        { word: "Needle", hint: "Eye" },
+        { word: "Button", hint: "Hole" },
+        { word: "Zipper", hint: "Teeth" },
+        { word: "Key", hint: "Lock" },
+        { word: "Lock", hint: "Key" },
+        { word: "Padlock", hint: "Shackle" },
+        { word: "Chain", hint: "Link" },
+        { word: "Rope", hint: "Knot" },
+        { word: "Duct Tape", hint: "Silver" },
+        { word: "Ladder", hint: "Rung" },
+        { word: "Step Stool", hint: "Step" },
+        { word: "Shovel", hint: "Dig" },
+        { word: "Rake", hint: "Tine" },
+        { word: "Hose", hint: "Water" },
+        { word: "Watering Can", hint: "Sprinkle" },
+        { word: "Lawn Mower", hint: "Grass" },
+        { word: "Screwdriver", hint: "Slot" },
+        { word: "Wrench", hint: "Nut" },
+        { word: "Pliers", hint: "Grip" },
+        { word: "Drill", hint: "Bit" },
+        { word: "Saw", hint: "Blade" },
+        { word: "Nail", hint: "Hammer" },
+        { word: "Screw", hint: "Thread" },
+        { word: "Lego", hint: "Brick" },
+        { word: "Puzzle", hint: "Piece" },
+        { word: "Doll", hint: "Plastic" },
+        { word: "Teddy Bear", hint: "Fur" },
+        { word: "Balloon", hint: "Float" },
+        { word: "Kite", hint: "Wind" },
+        { word: "Bicycle Lock", hint: "Cable" }
+      ],
+
+      Games: [
+        { word: "Minecraft", hint: "Blocks" },
+        { word: "Fortnite", hint: "Battle Royale" },
+        { word: "Valorant", hint: "Agents" },
+        { word: "Roblox", hint: "User-created" },
+        { word: "GTA", hint: "Crime city" },
+        { word: "PUBG", hint: "Chicken dinner" },
+        { word: "Call of Duty", hint: "FPS" },
+        { word: "Among Us", hint: "Crewmates" },
+        { word: "Clash Royale", hint: "Cards" },
+        { word: "Clash of Clans", hint: "Village" },
+        { word: "League of Legends", hint: "MOBA" },
+        { word: "Dota 2", hint: "Ancients" },
+        { word: "Apex Legends", hint: "Legends" },
+        { word: "FIFA", hint: "Football game" },
+        { word: "Rocket League", hint: "Cars and soccer" },
+        { word: "Elden Ring", hint: "Soulslike" },
+        { word: "Resident Evil", hint: "Zombies" },
+        { word: "The Sims", hint: "Life simulator" },
+        { word: "Candy Crush", hint: "Matching" },
+        { word: "Temple Run", hint: "Endless runner" }
+      ],
+
+      Sports: [
+        { word: "Football", hint: "Goal" },
+        { word: "Basketball", hint: "Hoop" },
+        { word: "Cricket", hint: "Bat" },
+        { word: "Tennis", hint: "Racket" },
+        { word: "Volleyball", hint: "Spike" },
+        { word: "Badminton", hint: "Shuttlecock" },
+        { word: "Baseball", hint: "Home run" },
+        { word: "Rugby", hint: "Tackle" },
+        { word: "Swimming", hint: "Pool" },
+        { word: "Boxing", hint: "Punches" },
+        { word: "MMA", hint: "Octagon" },
+        { word: "Golf", hint: "Clubs" },
+        { word: "Formula 1", hint: "Racing" },
+        { word: "Cycling", hint: "Bicycle" },
+        { word: "Skateboarding", hint: "Tricks" },
+        { word: "Surfing", hint: "Waves" },
+        { word: "Archery", hint: "Bow" },
+        { word: "Karate", hint: "Martial art" },
+        { word: "Wrestling", hint: "Grapple" },
+        { word: "Hockey", hint: "Stick" },
+        { word: "Table Tennis", hint: "Ping pong" },
+        { word: "Skiing", hint: "Snow" },
+        { word: "Snowboarding", hint: "Winter sport" },
+        { word: "Judo", hint: "Throws" },
+        { word: "Taekwondo", hint: "Kicks" },
+        { word: "Chess", hint: "Board strategy" },
+        { word: "Esports", hint: "Competitive gaming" },
+        { word: "Billiards", hint: "Cue stick" },
+        { word: "Bowling", hint: "Pins" },
+        { word: "Handball", hint: "Indoor court" },
+        { word: "Fencing", hint: "Sword duel" },
+        { word: "Gymnastics", hint: "Flexibility" },
+        { word: "Rowing", hint: "Boat race" },
+        { word: "Weightlifting", hint: "Barbell" },
+        { word: "Parkour", hint: "Freerunning" },
+        { word: "Diving", hint: "Water jumps" },
+        { word: "Snooker", hint: "Green table" },
+        { word: "Kabaddi", hint: "Raid" },
+        { word: "Lacrosse", hint: "Net stick" },
+        { word: "Polo", hint: "Horse sport" },
+        { word: "Sprint", hint: "Short race" },
+        { word: "Marathon", hint: "Long distance" },
+        { word: "Triathlon", hint: "Three sports" },
+        { word: "Motocross", hint: "Dirt bikes" },
+        { word: "Ice Hockey", hint: "Skating" },
+        { word: "Softball", hint: "Similar to baseball" },
+        { word: "Curling", hint: "Ice stones" },
+        { word: "Darts", hint: "Bullseye" },
+        { word: "Sumo", hint: "Japanese wrestling" },
+        { word: "Soccer", hint: "Goal" },
+        { word: "American Football", hint: "Touchdown" },
+        { word: "High Jump", hint: "Bar" },
+        { word: "Long Jump", hint: "Sand pit" },
+        { word: "Pole Vault", hint: "Fiberglass pole" },
+        { word: "Shot Put", hint: "Heavy ball" },
+        { word: "Discus Throw", hint: "Circular throw" },
+        { word: "Javelin Throw", hint: "Spear" },
+        { word: "Hurdles", hint: "Obstacles" },
+        { word: "Relay Race", hint: "Baton" },
+        { word: "Bodybuilding", hint: "Muscles" },
+        { word: "Powerlifting", hint: "Squat bench deadlift" },
+        { word: "Yoga", hint: "Meditation" },
+        { word: "Zumba", hint: "Dance fitness" },
+        { word: "Hiking", hint: "Mountain trail" },
+        { word: "Rock Climbing", hint: "Harness" },
+        { word: "Equestrian", hint: "Horse riding" },
+        { word: "Show Jumping", hint: "Horse jumps" },
+        { word: "Dressage", hint: "Horse dance" },
+        { word: "Field Hockey", hint: "Grass stick" },
+        { word: "Kickball", hint: "Kick instead of bat" },
+        { word: "Wiffle Ball", hint: "Holey plastic ball" },
+        { word: "Teeball", hint: "Ball on tee" },
+        { word: "Cricket T20", hint: "Short cricket" },
+        { word: "Walking Football", hint: "No running soccer" },
+        { word: "Dodgeball", hint: "Avoid being hit" },
+        { word: "Capture the Flag", hint: "Team flag game" },
+        { word: "Hula Hooping", hint: "Waist spin" },
+        { word: "Unicycling", hint: "One wheel" },
+        { word: "Trampolining", hint: "Bounce routine" },
+        { word: "Freerunning", hint: "Parkour" },
+        { word: "Drifting", hint: "Car slide" },
+        { word: "Kart Racing", hint: "Small open wheel" },
+        { word: "Calisthenics", hint: "Bodyweight" },
+        { word: "Water Basketball", hint: "Pool hoops" },
+        { word: "Beach Handball", hint: "Sand game" },
+        { word: "Mini Golf", hint: "Putting obstacles" },
+        { word: "Footvolley", hint: "Foot version" },
+        { word: "Rugby", hint: "Tackle" },
+        { word: "Marbles", hint: "Glass balls" },
+        { word: "Hopscotch", hint: "Chalk grid" },
+        { word: "Speed Skiing", hint: "Over 200 km/h" },
+      ]
+    };
+
+    let totalPlayers = 0;
+    let savedPlayers = 0;
+    let currentPlayer = 1;
+    let imposter = 0;
+    let selectedWord = null;
+    let revealed = false;
+
+    function startGame() {
+      if(savedPlayers > 0){
+        totalPlayers = savedPlayers;
+      } else {
+        totalPlayers = parseInt(document.getElementById('players').value);
+        savedPlayers = totalPlayers;
+      }
+
+      if (!totalPlayers || totalPlayers < 3) {
+        alert('Minimum 3 players required');
+        return;
+      }
+
+      imposter = Math.floor(Math.random() * totalPlayers) + 1;
+      const selectedBoxes = document.querySelectorAll('.categoryCheck:checked');
+
+      if(selectedBoxes.length === 0){
+        alert('Select at least one category');
+        return;
+      }
+
+      let allWords = [];
+
+      selectedBoxes.forEach(box => {
+        allWords = allWords.concat(categories[box.value]);
+      });
+
+      selectedWord = allWords[Math.floor(Math.random() * allWords.length)];
+
+      document.getElementById('setupScreen').classList.add('hidden');
+      document.getElementById('gameScreen').classList.remove('hidden');
+
+      updatePlayerScreen();
+    }
+
+    function updatePlayerScreen() {
+      revealed = false;
+
+      document.getElementById('playerText').innerText = `Player ${currentPlayer} / ${totalPlayers}`;
+      document.getElementById('roleText').innerText = 'Pass the device secretly';
+      document.getElementById('wordText').innerText = 'Tap Reveal';
+      document.getElementById('smallText').innerText = '';
+
+      document.getElementById('revealBtn').classList.remove('hidden');
+      document.getElementById('nextBtn').classList.add('hidden');
+    }
+
+    function revealRole() {
+      if (revealed) return;
+
+      if (currentPlayer === imposter) {
+        document.getElementById('roleText').innerText = '🕵️ You are the Imposter';
+        document.getElementById('wordText').innerText = `Hint: ${selectedWord.hint}`;
+        document.getElementById('smallText').innerText = 'Blend in and avoid getting caught!';
+      } else {
+        document.getElementById('roleText').innerText = '✅ Normal Player';
+        document.getElementById('wordText').innerText = selectedWord.word;
+        document.getElementById('smallText').innerText = 'Find the imposter.';
+      }
+
+      revealed = true;
+
+      document.getElementById('revealBtn').classList.add('hidden');
+      document.getElementById('nextBtn').classList.remove('hidden');
+    }
+
+    function revealImposter() {
+      document.querySelector('.card').innerHTML = `
+        <div class="role">🕵️ Imposter Revealed</div>
+        <div class="word">Player ${imposter}</div>
+        <div class="small">The secret word was: ${selectedWord.word}</div>
+      `;
+    }
+
+    function restartGame(){
+      currentPlayer = 1;
+      imposter = Math.floor(Math.random() * totalPlayers) + 1;
+
+      const selectedBoxes = document.querySelectorAll('.categoryCheck:checked');
+      let allWords = [];
+
+      selectedBoxes.forEach(box => {
+        allWords = allWords.concat(categories[box.value]);
+      });
+
+      selectedWord = allWords[Math.floor(Math.random() * allWords.length)];
+      revealed = false;
+
+      document.querySelector('.card').innerHTML = `
+        <div class="role" id="roleText">Pass the device secretly</div>
+        <div class="word" id="wordText">Tap Reveal</div>
+        <div class="small" id="smallText"></div>
+      `;
+
+      document.getElementById('playerText').innerText = `Player ${currentPlayer} / ${totalPlayers}`;
+
+      document.getElementById('revealBtn').classList.remove('hidden');
+      document.getElementById('nextBtn').classList.add('hidden');
+      document.getElementById('nextBtn').innerText = 'Next Player';
+      document.getElementById('nextBtn').onclick = nextPlayer;
+
+      updatePlayerScreen();
+    };
+
+      selectedWord = allWords[Math.floor(Math.random() * allWords.length)];
+
+      document.getElementById('nextBtn').innerText = 'Next Player';
+      document.getElementById('nextBtn').onclick = nextPlayer;
+
+      updatePlayerScreen();
+    
+
+    function nextPlayer() {
+      currentPlayer++;
+
+      if (currentPlayer > totalPlayers) {
+        document.querySelector('.card').innerHTML = `
+          <div class="role">🎉 All Roles Assigned</div>
+          <div class="small">Discuss and find the imposter!</div>
+          <button onclick="revealImposter()" style="margin-top:20px;">Reveal Imposter</button>
+        `;
+
+        document.getElementById('playerText').innerText = 'Game Started';
+        document.getElementById('nextBtn').innerText = 'Play Again';
+        document.getElementById('nextBtn').onclick = () => restartGame();
+
+        return;
+      }
+
+      updatePlayerScreen();
+    }
+  </script>
+
+</body>
+</html>
