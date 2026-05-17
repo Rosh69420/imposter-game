@@ -5,117 +5,194 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Imposter Word Game</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
-    }
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Segoe UI',sans-serif;
+}
 
-    body {
-      min-height: 100vh;
-      background: linear-gradient(135deg, #111827, #1f2937, #312e81);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: white;
-      padding: 20px;
-    }
+html, body{
+  height:100%;
+}
 
-    .container {
-      width: 100%;
-      max-width: 500px;
-      background: rgba(255,255,255,0.08);
-      backdrop-filter: blur(10px);
-      border-radius: 20px;
-      padding: 30px;
-      text-align: center;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-    }
+body{
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:20px;
+  overflow-x:hidden;
+  background:
+    radial-gradient(circle at top left,#7c3aed33,transparent 30%),
+    radial-gradient(circle at bottom right,#06b6d433,transparent 30%),
+    linear-gradient(135deg,#050816,#0f172a,#111827);
+  color:white;
+  position:relative;
+}
 
-    h1 {
-      margin-bottom: 20px;
-      font-size: 2.2rem;
-    }
+/* glowing background */
+body::before,
+body::after{
+  content:"";
+  position:absolute;
+  width:400px;
+  height:400px;
+  filter:blur(160px);
+  opacity:0.15;
+  z-index:0;
+}
 
-    p {
-      color: #d1d5db;
-      margin-bottom: 20px;
-    }
+body::before{
+  background:#7c3aed;
+  top:-120px;
+  left:-120px;
+}
 
-    input {
-      width: 100%;
-      padding: 14px;
-      border: none;
-      border-radius: 10px;
-      margin-bottom: 15px;
-      font-size: 1rem;
-    }
+body::after{
+  background:#06b6d4;
+  bottom:-120px;
+  right:-120px;
+}
 
-    button {
-      width: 100%;
-      padding: 14px;
-      border: none;
-      border-radius: 10px;
-      background: #6366f1;
-      color: white;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: 0.2s;
-      margin-top: 10px;
-    }
+.container{
+  position:relative;
+  z-index:1;
+  width:100%;
+  max-width:550px;
+  padding:30px;
+  border-radius:24px;
+  background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.12);
+  backdrop-filter:blur(18px);
+  box-shadow:0 10px 40px rgba(0,0,0,0.5);
+}
 
-    button:hover {
-      background: #4f46e5;
-      transform: scale(1.02);
-    }
+h1{
+  font-size:2.3rem;
+  text-align:center;
+  margin-bottom:10px;
+  background:linear-gradient(90deg,#a78bfa,#22d3ee);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
 
-    .card {
-      margin-top: 20px;
-      padding: 30px;
-      border-radius: 15px;
-      background: rgba(255,255,255,0.08);
-      min-height: 180px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    }
+p{
+  color:#cbd5e1;
+  text-align:center;
+  margin-bottom:20px;
+  line-height:1.5;
+}
 
-    .role {
-      font-size: 1.4rem;
-      margin-bottom: 15px;
-      color: #a5b4fc;
-    }
+input{
+  width:100%;
+  padding:14px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,0.12);
+  background:rgba(255,255,255,0.08);
+  color:white;
+  font-size:1rem;
+  margin-bottom:15px;
+  outline:none;
+}
 
-    .word {
-      font-size: 2rem;
-      font-weight: bold;
-      color: #fff;
-      text-transform: uppercase;
-    }
+button{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:14px;
+  background:linear-gradient(135deg,#7c3aed,#06b6d4);
+  color:white;
+  font-weight:600;
+  cursor:pointer;
+  transition:0.2s;
+}
 
-    .small {
-      margin-top: 10px;
-      font-size: 0.9rem;
-      color: #cbd5e1;
-    }
+button:hover{
+  transform:scale(1.03);
+}
 
-    .hidden {
-      display: none;
-    }
+.card{
+  margin-top:20px;
+  padding:30px 20px;
+  border-radius:20px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.1);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  min-height:220px;
+}
 
-    .playerCount {
-      font-size: 1.1rem;
-      margin-top: 10px;
-      color: #cbd5e1;
-    }
+.role{
+  font-size:1.3rem;
+  margin-bottom:12px;
+  color:#c4b5fd;
+  font-weight:bold;
+  text-align:center;
+}
+
+.word{
+  font-size:2rem;
+  font-weight:800;
+  text-align:center;
+  text-transform:uppercase;
+  background:linear-gradient(90deg,#fff,#a5f3fc);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+
+.small{
+  margin-top:10px;
+  color:#cbd5e1;
+  text-align:center;
+  font-size:0.95rem;
+}
+
+.playerInside{
+  font-size:1rem;
+  font-weight:700;
+  margin-bottom:10px;
+  color:#a5b4fc;
+  text-align:center;
+}
+
+.hidden{ display:none; }
+
+/* MOBILE RESPONSIVE FIX */
+@media (max-width:600px){
+  body{
+    align-items:flex-start;
+    padding-top:30px;
+  }
+
+  .container{
+    padding:20px;
+    border-radius:18px;
+  }
+
+  h1{
+    font-size:1.8rem;
+  }
+
+  .word{
+    font-size:1.6rem;
+  }
+
+  .role{
+    font-size:1.1rem;
+  }
+}
   </style>
 </head>
 <body>
 
   <div class="container">
     <h1>🎭 Imposter Word Game</h1>
+    <div class="startPlayer">
+        👑 Premium Party Edition
+    </div>
     <p>One player is the imposter and receives only a hint. Everyone else gets the real word.</p>
 
     <div id="setupScreen">
@@ -137,11 +214,13 @@
     <div id="gameScreen" class="hidden">
       <div class="playerCount" id="playerText"></div>
 
-      <div class="card">
-        <div class="role" id="roleText">Pass the device</div>
-        <div class="word" id="wordText">Tap Reveal</div>
-        <div class="small" id="smallText"></div>
-      </div>
+    <div class="card">
+      <div class="playerInside" id="playerInside">Player 1 / 1</div>
+
+      <div class="role" id="roleText">Pass the device</div>
+      <div class="word" id="wordText">Tap Reveal</div>
+      <div class="small" id="smallText"></div>
+    </div>
 
       <button id="revealBtn" onclick="revealRole()">Reveal</button>
       <button id="nextBtn" class="hidden" onclick="nextPlayer()">Next Player</button>
@@ -578,6 +657,7 @@
     let savedPlayers = 0;
     let currentPlayer = 1;
     let imposter = 0;
+    let startingPlayer = 1;
     let selectedWord = null;
     let revealed = false;
 
@@ -595,6 +675,7 @@
       }
 
       imposter = Math.floor(Math.random() * totalPlayers) + 1;
+      startingPlayer = Math.floor(Math.random() * totalPlayers) + 1;
       const selectedBoxes = document.querySelectorAll('.categoryCheck:checked');
 
       if(selectedBoxes.length === 0){
@@ -613,13 +694,15 @@
       document.getElementById('setupScreen').classList.add('hidden');
       document.getElementById('gameScreen').classList.remove('hidden');
 
+      currentPlayer = 1;
       updatePlayerScreen();
     }
 
     function updatePlayerScreen() {
       revealed = false;
 
-      document.getElementById('playerText').innerText = `Player ${currentPlayer} / ${totalPlayers}`;
+      document.getElementById('playerInside').innerText =
+      `Player ${currentPlayer} / ${totalPlayers}`;
       document.getElementById('roleText').innerText = 'Pass the device secretly';
       document.getElementById('wordText').innerText = 'Tap Reveal';
       document.getElementById('smallText').innerText = '';
@@ -632,7 +715,7 @@
       if (revealed) return;
 
       if (currentPlayer === imposter) {
-        document.getElementById('roleText').innerText = '🕵️ You are the Imposter';
+        document.getElementById('roleText').innerText = '❌ You are the Imposter';
         document.getElementById('wordText').innerText = `Hint: ${selectedWord.hint}`;
         document.getElementById('smallText').innerText = 'Blend in and avoid getting caught!';
       } else {
@@ -649,14 +732,16 @@
 
     function revealImposter() {
       document.querySelector('.card').innerHTML = `
-        <div class="role">🕵️ Imposter Revealed</div>
+        <div class="role">❌ Imposter Revealed</div>
         <div class="word">Player ${imposter}</div>
         <div class="small">The secret word was: ${selectedWord.word}</div>
       `;
     }
 
-    function restartGame(){
+      function restartGame(){
       currentPlayer = 1;
+      revealed = false;
+
       imposter = Math.floor(Math.random() * totalPlayers) + 1;
 
       const selectedBoxes = document.querySelectorAll('.categoryCheck:checked');
@@ -667,44 +752,57 @@
       });
 
       selectedWord = allWords[Math.floor(Math.random() * allWords.length)];
-      revealed = false;
 
       document.querySelector('.card').innerHTML = `
-        <div class="role" id="roleText">Pass the device secretly</div>
+        <div class="playerInside" id="playerInside">Player 1 / ${totalPlayers}</div>
+        <div class="role" id="roleText">Pass the device</div>
         <div class="word" id="wordText">Tap Reveal</div>
         <div class="small" id="smallText"></div>
       `;
 
-      document.getElementById('playerText').innerText = `Player ${currentPlayer} / ${totalPlayers}`;
+      document.getElementById('playerText').innerText =
+        `Player ${currentPlayer} / ${totalPlayers}`;
 
       document.getElementById('revealBtn').classList.remove('hidden');
       document.getElementById('nextBtn').classList.add('hidden');
-      document.getElementById('nextBtn').innerText = 'Next Player';
-      document.getElementById('nextBtn').onclick = nextPlayer;
-
-      updatePlayerScreen();
-    };
-
-      selectedWord = allWords[Math.floor(Math.random() * allWords.length)];
 
       document.getElementById('nextBtn').innerText = 'Next Player';
       document.getElementById('nextBtn').onclick = nextPlayer;
-
-      updatePlayerScreen();
+    }
     
 
     function nextPlayer() {
       currentPlayer++;
+      revealed = false;
 
       if (currentPlayer > totalPlayers) {
+
+        // RANDOM STARTING PLAYER SHOWN AT THE END
+        startingPlayer = Math.floor(Math.random() * totalPlayers) + 1;
+
         document.querySelector('.card').innerHTML = `
           <div class="role">🎉 All Roles Assigned</div>
-          <div class="small">Discuss and find the imposter!</div>
-          <button onclick="revealImposter()" style="margin-top:20px;">Reveal Imposter</button>
+
+          <div class="startPlayer" style="margin-top:20px;">
+            🎲 Starting Player: Player ${startingPlayer}
+          </div>
+
+          <div class="small" style="margin-top:20px;">
+            Discuss and find the imposter!
+          </div>
+
+          <button onclick="revealImposter()" style="margin-top:20px;">
+            Reveal Imposter
+          </button>
         `;
 
         document.getElementById('playerText').innerText = 'Game Started';
+
+        document.getElementById('revealBtn').classList.add('hidden');
+
+        document.getElementById('nextBtn').classList.remove('hidden');
         document.getElementById('nextBtn').innerText = 'Play Again';
+
         document.getElementById('nextBtn').onclick = () => restartGame();
 
         return;
