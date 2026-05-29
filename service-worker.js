@@ -1,4 +1,4 @@
-const CACHE_NAME = "imposter-game-v2";
+const CACHE_NAME = "imposter-game-v3";
 
 const FILES_TO_CACHE = [
   "./",
