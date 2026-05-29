@@ -207,7 +207,10 @@ button:hover{
         <label><input type="checkbox" class="categoryCheck" value="Games" checked> Games</label><br>
         <label><input type="checkbox" class="categoryCheck" value="Sports" checked> Sports</label>
       </div>
-
+      <label style="display:flex;align-items:center;gap:10px;margin-bottom:15px;">
+       <input type="checkbox" id="chaosToggle" checked>
+      Enable Chaos Mode
+      </label>
       <button onclick="startGame()">Start Game</button>
     </div>
 
@@ -755,7 +758,9 @@ button:hover{
     let startingPlayer = 1;
     let selectedWord = null;
     let revealed = false;
-
+    let chaosModeEnabled = true;
+    let chaosRound = false;
+    let chaosHints = [];
     function startGame() {
       if(savedPlayers > 0){
         totalPlayers = savedPlayers;
@@ -770,6 +775,12 @@ button:hover{
       }
 
       imposter = Math.floor(Math.random() * totalPlayers) + 1;
+      chaosModeEnabled = document.getElementById('chaosToggle').checked;
+
+      // 40% random chance
+      chaosRound = chaosModeEnabled && Math.random() < 0.10;
+
+      chaosHints = [];
       startingPlayer = Math.floor(Math.random() * totalPlayers) + 1;
       const selectedBoxes = document.querySelectorAll('.categoryCheck:checked');
 
@@ -785,6 +796,36 @@ button:hover{
       });
 
       selectedWord = allWords[Math.floor(Math.random() * allWords.length)];
+      // Create random chaos hints from SAME category
+      if (chaosRound) {
+
+        const selectedCategoryName =
+          selectedBoxes[Math.floor(Math.random() * selectedBoxes.length)].value;
+
+        const categoryWords = categories[selectedCategoryName];
+
+        const usedHints = [];
+
+      for(let i = 0; i < totalPlayers; i++){
+
+        let randomItem;
+        let tries = 0;
+
+        do{
+          randomItem =
+            categoryWords[Math.floor(Math.random() * categoryWords.length)];
+
+          tries++;
+
+        } while(
+          usedHints.includes(randomItem.hint) &&
+          tries < 50
+        );
+
+        usedHints.push(randomItem.hint);
+        chaosHints.push(randomItem.hint);
+      }
+      }
 
       document.getElementById('setupScreen').classList.add('hidden');
       document.getElementById('gameScreen').classList.remove('hidden');
@@ -806,38 +847,90 @@ button:hover{
       document.getElementById('nextBtn').classList.add('hidden');
     }
 
-    function revealRole() {
-      if (revealed) return;
+function revealRole() {
+  if (revealed) return;
 
-      if (currentPlayer === imposter) {
-        document.getElementById('roleText').innerText = '❌ You are the Imposter';
-        document.getElementById('wordText').innerText = `Hint: ${selectedWord.hint}`;
-        document.getElementById('smallText').innerText = 'Blend in and avoid getting caught!';
-      } else {
-        document.getElementById('roleText').innerText = '✅ Normal Player';
-        document.getElementById('wordText').innerText = selectedWord.word;
-        document.getElementById('smallText').innerText = 'Find the imposter.';
-      }
+  // CHAOS MODE
+  if (chaosRound) {
 
-      revealed = true;
+    document.getElementById('roleText').innerText =
+      '❌ You are the Imposter';
 
-      document.getElementById('revealBtn').classList.add('hidden');
-      document.getElementById('nextBtn').classList.remove('hidden');
+    document.getElementById('wordText').innerText =
+      `Hint: ${chaosHints[currentPlayer - 1]}`;
+
+    document.getElementById('smallText').innerText =
+      'Blend in and avoid getting caught!';
+
+  } else {
+
+    // NORMAL MODE
+    if (currentPlayer === imposter) {
+
+      document.getElementById('roleText').innerText =
+        '❌ You are the Imposter';
+
+      document.getElementById('wordText').innerText =
+        `Hint: ${selectedWord.hint}`;
+
+      document.getElementById('smallText').innerText =
+        'Blend in and avoid getting caught!';
+
+    } else {
+
+      document.getElementById('roleText').innerText =
+        '✅ Normal Player';
+
+      document.getElementById('wordText').innerText =
+        selectedWord.word;
+
+      document.getElementById('smallText').innerText =
+        'Find the imposter.';
     }
+  }
 
-    function revealImposter() {
-      document.querySelector('.card').innerHTML = `
-        <div class="role">❌ Imposter Revealed</div>
-        <div class="word">Player ${imposter}</div>
-        <div class="small">The secret word was: ${selectedWord.word}</div>
-      `;
-    }
+  revealed = true;
+
+  document.getElementById('revealBtn').classList.add('hidden');
+  document.getElementById('nextBtn').classList.remove('hidden');
+}
+
+function revealImposter() {
+
+  // CHAOS / TROLL ROUND
+  if (chaosRound) {
+
+    document.querySelector('.card').innerHTML = `
+      <div class="role">💀 CHAOS MODE</div>
+
+      <div class="word">
+        Everyone was the Imposter
+      </div>
+
+      <div class="small" style="margin-top:15px;">
+        Every player received different hints from the same category.
+      </div>
+    `;
+
+    return;
+  }
+
+  // NORMAL ROUND
+  document.querySelector('.card').innerHTML = `
+    <div class="role">❌ Imposter Revealed</div>
+    <div class="word">Player ${imposter}</div>
+    <div class="small">The secret word was: ${selectedWord.word}</div>
+  `;
+}
 
       function restartGame(){
       currentPlayer = 1;
       revealed = false;
 
       imposter = Math.floor(Math.random() * totalPlayers) + 1;
+      chaosModeEnabled = document.getElementById('chaosToggle').checked;
+      chaosRound = chaosModeEnabled && Math.random() < 0.10;
+      chaosHints = [];
 
       const selectedBoxes = document.querySelectorAll('.categoryCheck:checked');
       let allWords = [];
@@ -847,6 +940,35 @@ button:hover{
       });
 
       selectedWord = allWords[Math.floor(Math.random() * allWords.length)];
+      if (chaosRound) {
+
+      const selectedCategoryName =
+        selectedBoxes[Math.floor(Math.random() * selectedBoxes.length)].value;
+
+      const categoryWords = categories[selectedCategoryName];
+
+      const usedHints = [];
+
+for(let i = 0; i < totalPlayers; i++){
+
+  let randomItem;
+  let tries = 0;
+
+  do{
+    randomItem =
+      categoryWords[Math.floor(Math.random() * categoryWords.length)];
+
+    tries++;
+
+  } while(
+    usedHints.includes(randomItem.hint) &&
+    tries < 50
+  );
+
+  usedHints.push(randomItem.hint);
+  chaosHints.push(randomItem.hint);
+}
+    }
 
       document.querySelector('.card').innerHTML = `
         <div class="playerInside" id="playerInside">Player 1 / ${totalPlayers}</div>
