@@ -2061,17 +2061,13 @@ for(let i = 0; i < totalPlayers; i++){
       updatePlayerScreen();
     }
     if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("service-worker.js");
-    }
-  </script>
-<script>
-  if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
       navigator.serviceWorker.register("service-worker.js")
         .then(() => console.log("Service Worker Registered"))
         .catch(err => console.log("SW failed", err));
     });
   }
-</script>
+  </script>
+
 </body>
 </html>
